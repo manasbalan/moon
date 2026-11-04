@@ -1,0 +1,1128 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#05070d"><style>:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px);background:#05070d}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#05070d;color:#f2eee6}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Moon</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;500;600&family=Inter:wght@300;400;500;600&display=swap">
+<style>
+/* Layout: one tall scroll runway with a sticky WebGL stage. Scroll position drives a camera dive:
+   moon -> phone back (solar system around the camera) -> tilt parallax -> zoom into the moon lens -> exploded layers -> deep space.
+   After the runway: specs, lineup and pre-order, all still in the same night sky. One world, one theme: deep space,
+   moon-white type, a faint lunar-champagne accent and soft glass surfaces. */
+:root {
+  --space: #05070d;
+  --space-deep: #020407;
+  --paper: #05070d;
+  --ink: #f2eee6;
+  --moon: #f2eee6;
+  --accent: #d8c6a4;
+  --ice: #a8c8e4;
+  --mute: #8b95a4;
+  --line: rgba(232,236,244,.10);
+  --line-2: rgba(232,236,244,.20);
+  --f-display: 'Sora', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-label: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: auto; -webkit-text-size-adjust: 100%; }
+body { background: var(--space); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.6; overflow-x: clip;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+/* the sky: deep gradients and a fixed starfield behind everything below the stage */
+body::before { content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(1100px 640px at 76% -8%, rgba(96,136,214,.20), transparent 62%),
+    radial-gradient(900px 720px at 6% 26%, rgba(122,104,190,.14), transparent 68%),
+    radial-gradient(900px 700px at 52% 108%, rgba(216,198,164,.07), transparent 70%),
+    var(--space); }
+body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .75;
+  background-image:
+    radial-gradient(1.4px 1.4px at 22% 28%, rgba(255,255,255,.55), transparent 100%),
+    radial-gradient(1px 1px at 68% 12%, rgba(255,255,255,.42), transparent 100%),
+    radial-gradient(1.2px 1.2px at 84% 62%, rgba(255,255,255,.45), transparent 100%),
+    radial-gradient(1px 1px at 12% 74%, rgba(255,255,255,.32), transparent 100%),
+    radial-gradient(1px 1px at 45% 88%, rgba(255,255,255,.35), transparent 100%);
+  background-size: 520px 520px, 380px 380px, 640px 640px, 300px 300px, 700px 700px; }
+::selection { background: rgba(216,198,164,.30); color: #fff; }
+p, h1, h2, h3 { margin: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 300; text-transform: none; line-height: 1.06; letter-spacing: -.025em; text-wrap: balance; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.wrap { max-width: 1160px; margin-inline: auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.label { font-family: var(--f-label); font-weight: 500; font-size: 11px; letter-spacing: .34em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 12px; }
+.label::before { content: ""; width: 26px; height: 1px; background: currentColor; opacity: .7; }
+.btn { font-family: var(--f-label); font-weight: 500; font-size: 14px; letter-spacing: .02em; text-transform: none; border: 1px solid transparent; cursor: pointer; padding: 14px 28px; color: #0a0d14; background: var(--moon); text-decoration: none; display: inline-block; border-radius: 999px;
+  transition: background .35s cubic-bezier(.22,.61,.36,1), transform .35s cubic-bezier(.22,.61,.36,1), box-shadow .35s cubic-bezier(.22,.61,.36,1), border-color .35s; }
+.btn:hover { background: #fff; transform: translateY(-1px); box-shadow: 0 10px 34px -12px rgba(216,198,164,.45); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #05070d; }
+::-webkit-scrollbar-thumb { background: rgba(232,236,244,.14); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(232,236,244,.24); }
+html { scrollbar-color: rgba(232,236,244,.18) #05070d; scrollbar-width: thin; }
+
+/* ---------- Stage ---------- */
+.scroll { position: relative; height: 1700vh; }
+.stage { --fg: #f2eee6; position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; background: var(--space); color: var(--fg); isolation: isolate; }
+.nebula { position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(58% 48% at 79% 36%, rgba(62,98,178,.26), transparent 72%),
+    radial-gradient(52% 42% at 9% 84%, rgba(120,84,162,.16), transparent 72%),
+    radial-gradient(48% 40% at 50% 106%, rgba(216,198,164,.09), transparent 70%); }
+/* soft cinematic vignette so the 3D scene sits inside the frame */
+.stage::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(126% 100% at 50% 44%, transparent 44%, rgba(2,4,8,.52) 100%); }
+#gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.fb { position: absolute; right: 8%; top: 22%; width: min(46vw, 420px); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #fffdf6, #d9d3c4 45%, #7f7a6f 100%); box-shadow: 0 0 150px rgba(236,232,225,.16); }
+
+.top { position: absolute; z-index: 5; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 22px); padding-bottom: 20px;
+  padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+.logo { font-family: var(--f-display); font-weight: 500; font-size: 13px; letter-spacing: .44em; line-height: 1; text-transform: uppercase; color: var(--fg); text-decoration: none; }
+.where { font-family: var(--f-label); font-weight: 500; font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: var(--fg); opacity: .55; text-align: right; }
+.where b { color: var(--accent); font-weight: 500; margin-right: 10px; }
+.top .btn { padding: 11px 22px; font-size: 13px; background: rgba(255,255,255,.07); color: var(--fg); border-color: rgba(232,236,244,.18); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.top .btn:hover { background: rgba(255,255,255,.14); box-shadow: none; }
+
+.rail { position: absolute; z-index: 5; left: max(14px, env(safe-area-inset-left, 0px)); top: 24%; bottom: 24%; width: 1px; background: rgba(232,236,244,.12); }
+.rail i { position: absolute; left: 0; top: 0; width: 1px; height: calc(var(--p, 0) * 100%); background: linear-gradient(180deg, transparent, var(--accent)); }
+
+.ch { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; pointer-events: none; opacity: 0; will-change: opacity, transform;
+  padding: 96px max(28px, env(safe-area-inset-right, 0px)) 96px max(48px, env(safe-area-inset-left, 0px)); }
+.ch.c0 { opacity: 1; }
+.ch .in { display: grid; gap: 20px; max-width: 480px; justify-items: start; min-width: 0; }
+.ch.right { justify-content: flex-end; }
+.ch.mid { justify-content: center; text-align: center; }
+.ch.mid .in { justify-items: center; max-width: 640px; }
+.ch h1 { font-size: clamp(84px, 16.5vw, 228px); font-weight: 200; letter-spacing: -.055em; line-height: .84; }
+.ch h2 { font-size: clamp(38px, 5.2vw, 72px); font-weight: 300; }
+.ch p { font-size: 17px; color: rgba(242,238,230,.66); max-width: 42ch; line-height: 1.66; }
+.hint { font-family: var(--f-label); font-weight: 500; font-size: 11px; letter-spacing: .32em; text-transform: uppercase; display: flex; align-items: center; gap: 14px; opacity: .5; }
+.hint i { width: 1px; height: 42px; background: linear-gradient(currentColor, transparent); animation: drip 2.4s cubic-bezier(.4,0,.2,1) infinite; transform-origin: top; }
+@keyframes drip { 0% { transform: scaleY(0); opacity: 0; } 35% { opacity: 1; } 55% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+.legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; width: min(380px, 100%); border-top: 1px solid var(--line); }
+.legend li { display: grid; grid-template-columns: 32px 1fr; gap: 12px; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.legend li b { font-family: var(--f-label); font-weight: 500; font-size: 11px; letter-spacing: .16em; color: var(--accent); }
+.legend li span { font-family: var(--f-body); font-weight: 500; font-size: 15px; letter-spacing: 0; }
+.legend li em { display: block; font-style: normal; font-family: var(--f-body); font-weight: 400; text-transform: none; letter-spacing: 0; opacity: .55; font-size: 13.5px; }
+
+.ch .in { text-shadow: 0 2px 28px rgba(2,4,8,.75); }
+.kv { list-style: none; margin: 0; padding: 0; display: grid; width: min(390px, 100%); border-top: 1px solid var(--line); }
+.kv li { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 15px; color: rgba(242,238,230,.6); }
+.kv li b { font-family: var(--f-label); font-weight: 500; letter-spacing: .02em; text-transform: none; font-size: 13.5px; color: var(--fg); text-align: right; }
+.ch.stn .in { max-width: 410px; }
+.ch.ice .label, .ch.ice .kv li b { color: var(--ice); }
+@media (max-width: 760px) { .ch.stn p { display: none; } .ch.stn h2 { font-size: 30px; } .kv li { font-size: 14px; padding: 8px 0; } }
+
+@media (max-width: 760px) {
+  .ch { align-items: flex-end; padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px)); padding-left: max(22px, env(safe-area-inset-left, 0px)); padding-right: max(22px, env(safe-area-inset-right, 0px)); }
+  .ch.right { justify-content: flex-start; }
+  .ch h1 { font-size: clamp(76px, 26vw, 150px); }
+  .ch h2 { font-size: 32px; }
+  .ch p { font-size: 15px; }
+  .top { padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }
+  .where { display: none; }
+  .rail { display: none; }
+}
+
+/* ---------- Page: still night sky, soft glass surfaces ---------- */
+section { padding-block: 112px; }
+.head { display: grid; gap: 18px; margin-bottom: 52px; max-width: 760px; }
+.head h2 { font-size: clamp(36px, 4.6vw, 60px); font-weight: 300; }
+.head p { color: var(--mute); font-size: 17px; max-width: 54ch; }
+.specs { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 22px; overflow: hidden;
+  background: linear-gradient(170deg, rgba(255,255,255,.055), rgba(255,255,255,.015)); }
+.spec { padding: 34px 28px; border-right: 1px solid var(--line); display: grid; gap: 10px; min-width: 0; }
+.spec:last-child { border-right: 0; }
+.spec b { font-family: var(--f-display); font-weight: 300; font-size: clamp(44px, 5.6vw, 76px); line-height: .95; letter-spacing: -.035em; font-variant-numeric: tabular-nums; }
+.spec b small { font-size: .32em; font-weight: 400; color: var(--accent); margin-left: 5px; letter-spacing: .02em; }
+.spec span { font-family: var(--f-label); font-weight: 500; font-size: 11px; letter-spacing: .26em; text-transform: uppercase; color: var(--mute); }
+@media (max-width: 880px) { .specs { grid-template-columns: 1fr 1fr; } .spec:nth-child(2) { border-right: 0; } .spec:nth-child(-n+2) { border-bottom: 1px solid var(--line); } }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.card { background: linear-gradient(170deg, rgba(255,255,255,.055), rgba(255,255,255,.015)); color: var(--ink); padding: 32px 28px 34px; display: grid; gap: 18px; align-content: start; min-width: 0;
+  border: 1px solid var(--line); border-radius: 22px;
+  transition: transform .45s cubic-bezier(.22,.61,.36,1), border-color .45s, background .45s, box-shadow .45s; }
+.card:hover { transform: translateY(-4px); border-color: var(--line-2); background: linear-gradient(170deg, rgba(255,255,255,.075), rgba(255,255,255,.025)); }
+.card.pick { border-color: rgba(216,198,164,.38); box-shadow: 0 30px 80px -46px rgba(216,198,164,.55); }
+.card .tag { font-family: var(--f-label); font-weight: 500; font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: #0a0d14; background: var(--accent); padding: 6px 12px; border-radius: 999px; justify-self: start; }
+.card .tag.none { visibility: hidden; }
+.card h3 { font-size: 30px; font-weight: 400; letter-spacing: -.02em; }
+.card .price { font-family: var(--f-display); font-weight: 300; font-size: 26px; color: var(--accent); letter-spacing: .01em; line-height: 1; }
+.card ul { list-style: none; margin: 0; padding: 0; }
+.card li { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 14px; color: rgba(242,238,230,.6); }
+.card li b { font-family: var(--f-label); font-weight: 500; letter-spacing: 0; color: #fff; text-align: right; }
+@media (max-width: 880px) { .cards { grid-template-columns: 1fr; } }
+.notify { position: relative; overflow: hidden; border-top: 1px solid var(--line); }
+.notify .big { position: absolute; right: -3%; bottom: -16%; font-family: var(--f-display); font-weight: 200; font-size: clamp(150px, 28vw, 360px); color: transparent; -webkit-text-stroke: 1px rgba(232,236,244,.09); line-height: .8; letter-spacing: -.04em; pointer-events: none; user-select: none; }
+.notify .inner { position: relative; display: grid; gap: 22px; max-width: 720px; padding: clamp(28px, 5vw, 54px); border: 1px solid var(--line); border-radius: 26px;
+  background: linear-gradient(170deg, rgba(255,255,255,.06), rgba(255,255,255,.015)); }
+.notify h2 { font-size: clamp(36px, 4.6vw, 60px); font-weight: 300; }
+.notify p { color: rgba(242,238,230,.62); font-size: 17px; }
+.form { display: flex; gap: 12px; flex-wrap: wrap; }
+.form input { flex: 1 1 260px; min-width: 0; background: rgba(255,255,255,.05); border: 1px solid var(--line-2); color: var(--ink); font: 15px var(--f-body); padding: 14px 22px; border-radius: 999px;
+  transition: border-color .35s, background .35s; }
+.form input::placeholder { color: rgba(242,238,230,.34); }
+.form input:focus { outline: none; border-color: rgba(216,198,164,.55); background: rgba(255,255,255,.075); }
+.msg { font-family: var(--f-label); font-weight: 500; letter-spacing: .06em; font-size: 13px; color: var(--mute); min-height: 22px; }
+footer { color: rgba(242,238,230,.42); border-top: 1px solid var(--line); padding-block: 36px; font-size: 13px; }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+@media (prefers-reduced-motion: reduce) { .hint i { animation: none; } .card { transition: none; } }
+</style>
+
+<main>
+<div class="scroll" id="scroll">
+  <div class="stage" id="stage">
+    <div class="nebula"></div>
+    <canvas id="gl" aria-label="3D scene of the Moon phone"></canvas>
+    <div class="fb" id="fb" hidden></div>
+
+    <div class="top">
+      <a class="logo" href="#top">MOON</a>
+      <div class="where" id="where"><b>00</b>Deep space</div>
+      <a class="btn" href="#notify">Pre-order</a>
+    </div>
+    <div class="rail" aria-hidden="true"><i></i></div>
+
+    <div class="ch c0" id="c0">
+      <div class="in">
+        <span class="label">Moon One</span>
+        <h1>Moon</h1>
+        <p>A real lens under a moon. The whole back is a sky.</p>
+        <div class="hint"><i></i>Scroll to go deeper</div>
+      </div>
+    </div>
+    <div class="ch c1" id="c1">
+      <div class="in">
+        <span class="label">Orbit Glass</span>
+        <h2>The back is a sky.</h2>
+        <p>Three floating layers of orbit sit inside the glass, each at its own depth. Planets circle the camera at the centre.</p>
+      </div>
+    </div>
+    <div class="ch c2 right" id="c2">
+      <div class="in">
+        <span class="label">Depth parallax</span>
+        <h2>Tilt it. The system moves.</h2>
+        <p>Every layer sits at a different depth, so the planets drift against each other as you turn the phone. Move your pointer over the page to tilt it yourself.</p>
+      </div>
+    </div>
+    <div class="ch cs" id="cs">
+      <div class="in">
+        <span class="label">Side rail</span>
+        <h2>The edge is a ruler.</h2>
+        <p>Milled degree marks run down one side, like the scale on the glass. The other side holds the Side Light, a strip that works as a fill flash and chases around the frame for alerts.</p>
+        <ul class="kv"><li>Frame<b>Aluminium, milled</b></li><li>Side Light<b>28 segments</b></li><li>Buttons<b>Power, volume, slider</b></li></ul>
+      </div>
+    </div>
+    <div class="ch c3 right" id="c3">
+      <div class="in">
+        <span class="label">Night Sensor</span>
+        <h2>The moon opens. The lens is real.</h2>
+        <p>The moon lands on the back, then opens like an aperture. Underneath sits a real seven-element lens: 200 MP, f/1.6, optical stabilisation and a Spectra ISP that shoots 8K.</p>
+      </div>
+    </div>
+    <div class="ch c4 right" id="c4">
+      <div class="in">
+        <span class="label">Peel it apart</span>
+        <h2>Eight layers.</h2>
+        <ol class="legend">
+          <li><b>01</b><span>Orbit layers<em>Three planes of planets and rings</em></span></li>
+          <li><b>02</b><span>Camera module<em>200 MP main, ultra-wide, 3× tele, flash</em></span></li>
+          <li><b>03</b><span>Back glass<em>Starfield and blueprint etching</em></span></li>
+          <li><b>04</b><span>Cooling chamber<em>Vapour chamber over the chip</em></span></li>
+          <li><b>05</b><span>Processor<em>Snapdragon 8 Elite Gen 6, 2 nm</em></span></li>
+          <li><b>06</b><span>Battery<em>5,500 mAh, 120 W charging</em></span></li>
+          <li><b>07</b><span>Logic board<em>Moon OS, 7 years of updates</em></span></li>
+          <li><b>08</b><span>Display<em>6.7 in curved, 144 Hz AMOLED</em></span></li>
+        </ol>
+      </div>
+    </div>
+    <div class="ch k1 stn" id="k1">
+      <div class="in">
+        <span class="label">Camera module</span>
+        <h2>A real lens under the moon.</h2>
+        <p>Seven elements in a machined metal barrel, an f/1.6 aperture and a 200 MP sensor with optical stabilisation. An ultra-wide and a 3× telephoto sit below it, with a dual-tone flash that matches skin in warm and cool light.</p>
+        <ul class="kv"><li>Main lens<b>200 MP · f/1.6 · OIS</b></li><li>Elements<b>7P, lunar coating</b></li><li>Ultra-wide<b>50 MP · 114°</b></li><li>Telephoto<b>50 MP · 3× optical</b></li><li>Video<b>8K 30 · 4K 120</b></li><li>Flash<b>Dual-tone LED</b></li></ul>
+      </div>
+    </div>
+    <div class="ch k2 right stn" id="k2">
+      <div class="in">
+        <span class="label">Processor</span>
+        <h2>Snapdragon 8 Elite Gen 6.</h2>
+        <p>Qualcomm's 2 nm flagship, with Oryon V4 cores up to 5.0 GHz and a new Adreno GPU. Sixteen gigabytes of LPDDR5X sit beside it, so the frame rate holds at 144 when the scene gets heavy.</p>
+        <ul class="kv"><li>CPU<b>8× Oryon V4 · 5.0 GHz</b></li><li>GPU<b>Adreno · ray tracing</b></li><li>Node<b>TSMC 2 nm</b></li><li>Memory<b>16 GB LPDDR5X</b></li><li>Storage<b>1 TB UFS 4.1</b></li><li>Frame rate<b>144 fps</b></li></ul>
+      </div>
+    </div>
+    <div class="ch k3 ice stn" id="k3">
+      <div class="in">
+        <span class="label">Vapour chamber</span>
+        <h2>Ice cold under load.</h2>
+        <p>A full-width vapour chamber sits directly on the chip. A 0.35 mm copper wall, a stamped copper wick and a graphite sheet spread heat across 6,400 mm², so the clocks never fall away mid-game.</p>
+        <ul class="kv"><li>Vapour chamber<b>6,400 mm²</b></li><li>Copper wall<b>0.35 mm</b></li><li>Wick<b>Stamped copper mesh</b></li><li>Graphite sheet<b>0.1 mm</b></li><li>Surface temperature<b>14 °C lower</b></li></ul>
+      </div>
+    </div>
+    <div class="ch k4 right stn" id="k4">
+      <div class="in">
+        <span class="label">Battery</span>
+        <h2>All day. Then 28 minutes.</h2>
+        <p>Two silicon-carbon cells hold 5,500 mAh. At 120 W the charge bar goes from empty to full in 28 minutes.</p>
+        <ul class="kv"><li>Capacity<b>5,500 mAh</b></li><li>Charging<b>120 W wired</b></li><li>Cells<b>2, silicon-carbon</b></li><li>Health<b>80% after 1,600 cycles</b></li></ul>
+      </div>
+    </div>
+    <div class="ch k5 stn" id="k5">
+      <div class="in">
+        <span class="label">Curved display</span>
+        <h2>The front is a curve.</h2>
+        <p>Turn the phone over and the stack ends in a curved LTPO AMOLED. The glass bends into the frame at both edges, so the picture runs edge to edge at 144 Hz.</p>
+        <ul class="kv"><li>Size<b>6.7 in curved AMOLED</b></li><li>Glass<b>2.5D, edge-curved</b></li><li>Refresh<b>1 to 144 Hz LTPO</b></li><li>Peak brightness<b>4,500 nits</b></li></ul>
+      </div>
+    </div>
+    <div class="ch c5 mid" id="c5">
+      <div class="in">
+        <span class="label">Moon One</span>
+        <h2>One moon. One sky.</h2>
+        <p>Pre-orders open soon. Keep scrolling for the specs.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section id="specs">
+  <div class="wrap">
+    <div class="head">
+      <span class="label">Moon One / Specs</span>
+      <h2>Numbers that matter</h2>
+    </div>
+    <div class="specs">
+      <div class="spec"><b>144</b><span>Hz refresh</span></div>
+      <div class="spec"><b>200<small>MP</small></b><span>Night Sensor</span></div>
+      <div class="spec"><b>5,500</b><span>mAh battery</span></div>
+      <div class="spec"><b>120<small>W</small></b><span>Wired charging</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="lineup" style="padding-top:0">
+  <div class="wrap">
+    <div class="head">
+      <span class="label">The lineup</span>
+      <h2>Pick your orbit</h2>
+    </div>
+    <div class="cards">
+      <article class="card"><span class="tag none">.</span><h3>Moon Lite</h3><div class="price">₹24,999</div>
+        <ul><li>Display <b>6.5" 90 Hz</b></li><li>Camera <b>50 MP</b></li><li>Battery <b>5,000 mAh</b></li></ul></article>
+      <article class="card pick"><span class="tag">Most picked</span><h3>Moon One</h3><div class="price">₹49,999</div>
+        <ul><li>Display <b>6.7" 144 Hz</b></li><li>Camera <b>200 MP Night Sensor</b></li><li>Battery <b>5,500 mAh</b></li></ul></article>
+      <article class="card"><span class="tag none">.</span><h3>Moon Pro</h3><div class="price">₹79,999</div>
+        <ul><li>Display <b>6.9" 165 Hz LTPO</b></li><li>Camera <b>200 MP + 50 MP zoom</b></li><li>Battery <b>6,000 mAh</b></li></ul></article>
+    </div>
+  </div>
+</section>
+
+<section class="notify" id="notify">
+  <div class="big" aria-hidden="true">MOON</div>
+  <div class="wrap">
+    <div class="inner">
+      <span class="label">Pre-order</span>
+      <h2>Ready when the sun sets</h2>
+      <p>Leave your email and we will tell you the day Moon One opens for orders.</p>
+      <form class="form" id="form" novalidate>
+        <label for="email" style="position:absolute;left:-9999px">Email address</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+        <button class="btn" type="submit">Notify me</button>
+      </form>
+      <div class="msg" id="msg" role="status"></div>
+    </div>
+  </div>
+</section>
+</main>
+<footer><div class="wrap"><span>MOON</span><span>Concept site. Names, specs and prices are placeholders.</span></div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var clamp = function (x, a, b) { return Math.max(a, Math.min(b, x)); };
+  var lerp = function (a, b, t) { return a + (b - a) * t; };
+  var sm = function (a, b, x) { x = clamp((x - a) / (b - a), 0, 1); return x * x * (3 - 2 * x); };
+  var win = function (a, b, c, d, p) { return sm(a, b, p) * (1 - sm(c, d, p)); };
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- form ---------- */
+  $('#form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = $('#email').value.trim(), m = $('#msg');
+    m.textContent = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)
+      ? 'Thanks. This is a concept site, so nothing was submitted.'
+      : 'Enter a valid email address, like name@example.com.';
+  });
+
+  var stage = $('#stage'), scrollEl = $('#scroll'), canvas = $('#gl');
+  var chapters = ['c0', 'c1', 'c2', 'cs', 'c3', 'c4', 'k1', 'k2', 'k3', 'k4', 'k5', 'c5'].map(function (id) { return $('#' + id); });
+  var wins = [[-1, 0, .04, .08], [.09, .11, .15, .17], [.18, .20, .25, .27], [.28, .295, .345, .37], [.39, .40, .42, .435], [.455, .47, .49, .51],
+    [.525, .54, .575, .59], [.605, .62, .655, .67], [.685, .70, .735, .75], [.765, .78, .815, .83], [.845, .86, .895, .91], [.94, .97, 1.1, 1.2]];
+  var names = [[0, '00', 'Deep space'], [.09, '01', 'Orbit glass'], [.18, '02', 'Depth parallax'], [.275, '03', 'Side rail'], [.385, '04', 'Lens revealed'], [.45, '05', 'Exploded view'],
+    [.52, '06', 'Camera module'], [.60, '07', 'Processor'], [.68, '08', 'Cooling chamber'], [.76, '09', 'Battery'], [.84, '10', 'Display'], [.93, '11', 'Moon One']];
+  var whereEl = $('#where'), lastWhere = -1;
+
+  var pT = 0, pS = 0;
+  function readScroll() {
+    var r = scrollEl.getBoundingClientRect();
+    pT = clamp(-r.top / Math.max(1, r.height - window.innerHeight), 0, 1);
+  }
+  window.addEventListener('scroll', readScroll, { passive: true });
+  readScroll(); pS = pT;
+
+  function mixHex(a, b, t) {
+    var pa = [1, 3, 5].map(function (i) { return parseInt(a.substr(i, 2), 16); });
+    var pb = [1, 3, 5].map(function (i) { return parseInt(b.substr(i, 2), 16); });
+    return 'rgb(' + pa.map(function (v, i) { return Math.round(lerp(v, pb[i], t)); }).join(',') + ')';
+  }
+
+  function updateOverlay(p, w) {
+    chapters.forEach(function (el, i) {
+      var o = win(wins[i][0], wins[i][1], wins[i][2], wins[i][3], p);
+      if (i === 0 && p < .001) o = 1;
+      el.style.opacity = o.toFixed(3);
+      el.style.transform = 'translateY(' + ((1 - o) * 18).toFixed(1) + 'px)';
+    });
+    stage.style.background = mixHex('#05070d', '#020407', w);
+    stage.style.setProperty('--p', p.toFixed(4));
+    var idx = 0; for (var i = 0; i < names.length; i++) if (p >= names[i][0]) idx = i;
+    if (idx !== lastWhere) { lastWhere = idx; whereEl.innerHTML = '<b>' + names[idx][1] + '</b>' + names[idx][2]; }
+  }
+
+  /* ---------- WebGL ---------- */
+  var renderer;
+  try {
+    if (!window.THREE) throw new Error('no three');
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+  } catch (err) {
+    $('#fb').hidden = false;
+    var loop0 = function () { readScroll(); pS += (pT - pS) * .1; updateOverlay(pS, sm(.86, .94, pS)); requestAnimationFrame(loop0); };
+    loop0();
+    return;
+  }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  renderer.setClearColor(0x000000, 0);
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(35, 1, .05, 200);
+
+  /* lights */
+  var amb = new THREE.AmbientLight(0x8fa4d8, .22); scene.add(amb);
+  var sun = new THREE.DirectionalLight(0xfff4e3, 2.5); sun.position.set(4, 2.2, 4.5); scene.add(sun);
+  var rim = new THREE.PointLight(0x6f8cff, 1.1, 12); rim.position.set(-3, -1, 2.5); scene.add(rim);
+
+  /* ---------- procedural moon ---------- */
+  function mulberry(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function mk(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+  function blob(ctx, x, y, r, col) {
+    var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, col); g.addColorStop(1, col.replace(/[\d.]+\)$/, '0)'));
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+  }
+  function makeMoonMaps() {
+    var W = 2048, H = 1024, rnd = mulberry(11);
+    var cc = mk(W, H), hh = mk(W, H), c = cc.getContext('2d'), h = hh.getContext('2d');
+    c.fillStyle = '#9a9792'; c.fillRect(0, 0, W, H);
+    h.fillStyle = '#808080'; h.fillRect(0, 0, W, H);
+    var i, k;
+    for (i = 0; i < 2200; i++) {
+      var bx = rnd() * W, by = rnd() * H, br = 8 + rnd() * 90, lt = rnd() < .5;
+      blob(c, bx, by, br, 'rgba(' + (lt ? '255,252,244' : '20,20,24') + ',' + (.02 + rnd() * .04).toFixed(3) + ')');
+      blob(h, bx, by, br, 'rgba(' + (lt ? '255,255,255' : '0,0,0') + ',' + (.03 + rnd() * .05).toFixed(3) + ')');
+    }
+    var maria = [[.35, .36, .11], [.45, .5, .08], [.29, .56, .065], [.57, .34, .075], [.63, .55, .055], [.5, .27, .045], [.2, .4, .06], [.8, .46, .05], [.42, .66, .04]];
+    maria.forEach(function (m) {
+      for (k = 0; k < 9; k++) {
+        var mx = (m[0] + (rnd() - .5) * m[2] * 1.4) * W, my = (m[1] + (rnd() - .5) * m[2] * 2) * H, mr = m[2] * W * (.35 + rnd() * .55);
+        blob(c, mx, my, mr, 'rgba(48,52,60,.34)');
+        blob(h, mx, my, mr, 'rgba(0,0,0,.13)');
+      }
+    });
+    function crater(x, y, r) {
+      var s = Math.max(.28, Math.sin(clamp(y / H, .02, .98) * Math.PI)), sx = 1 / s;
+      [-W, 0, W].forEach(function (off) {
+        var px = x + off; if (px + r * sx < 0 || px - r * sx > W) return;
+        [[c, true], [h, false]].forEach(function (pair) {
+          var ctx = pair[0], isC = pair[1];
+          ctx.save(); ctx.translate(px, y); ctx.scale(sx, 1);
+          var g = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+          if (isC) {
+            g.addColorStop(0, 'rgba(50,50,56,.30)'); g.addColorStop(.72, 'rgba(50,50,56,.16)');
+            g.addColorStop(.88, 'rgba(240,237,228,.26)'); g.addColorStop(1, 'rgba(240,237,228,0)');
+          } else {
+            g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(.74, 'rgba(0,0,0,.38)');
+            g.addColorStop(.9, 'rgba(255,255,255,.6)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+          }
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, 6.2832); ctx.fill(); ctx.restore();
+        });
+      });
+    }
+    for (i = 0; i < 3400; i++) crater(rnd() * W, rnd() * H, 2.5 + 78 * Math.pow(rnd(), 4.4));
+    for (i = 0; i < 3; i++) {                       /* bright ray craters */
+      var rx = rnd() * W, ry = H * (.25 + rnd() * .5);
+      for (k = 0; k < 26; k++) {
+        var a = rnd() * 6.2832, len = 90 + rnd() * 260;
+        c.strokeStyle = 'rgba(245,243,235,' + (.05 + rnd() * .07).toFixed(3) + ')'; c.lineWidth = 1 + rnd() * 2.5;
+        c.beginPath(); c.moveTo(rx, ry); c.lineTo(rx + Math.cos(a) * len, ry + Math.sin(a) * len * .8); c.stroke();
+      }
+      blob(c, rx, ry, 22, 'rgba(250,248,240,.5)');
+    }
+    var map = new THREE.CanvasTexture(cc), bump = new THREE.CanvasTexture(hh);
+    map.encoding = THREE.sRGBEncoding;
+    map.anisotropy = bump.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    return { map: map, bump: bump };
+  }
+  var mm = makeMoonMaps();
+  /* The moon is two machined shell halves. It descends as one sphere, then the halves part
+     down the middle as it touches the phone, uncovering the lens inside: the moon turns into the camera. */
+  var moon = new THREE.Group(), moonMats = [], moonDoors = [];
+  function moonShell(phiStart, swing) {
+    var mat = new THREE.MeshStandardMaterial({ map: mm.map, bumpMap: mm.bump, bumpScale: 2.2, roughness: .96, metalness: 0, transparent: true });
+    var pivot = new THREE.Group();
+    pivot.add(new THREE.Mesh(new THREE.SphereGeometry(1, 48, 64, phiStart, Math.PI, 0, Math.PI), mat));
+    /* the inside of each half is the lens housing, so the moon reads as turning into the camera */
+    var inner = new THREE.Mesh(new THREE.SphereGeometry(.955, 40, 40, phiStart, Math.PI, 0, Math.PI),
+      new THREE.MeshStandardMaterial({ color: 0x171b22, metalness: .92, roughness: .34, side: THREE.BackSide, transparent: true }));
+    pivot.add(inner);
+    moon.add(pivot);
+    moonMats.push(mat, inner.material);
+    moonDoors.push({ pivot: pivot, swing: swing });
+  }
+  moonShell(Math.PI / 2, -1);      /* right half, hinged at the middle seam */
+  moonShell(Math.PI * 1.5, 1);     /* left half */
+  moon.rotation.y = 3.9;
+  scene.add(moon);
+
+  /* soft glow behind the moon */
+  var gc = mk(256, 256), gx = gc.getContext('2d'), gg = gx.createRadialGradient(128, 128, 20, 128, 128, 128);
+  gg.addColorStop(0, 'rgba(210,222,255,.55)'); gg.addColorStop(.35, 'rgba(150,175,255,.16)'); gg.addColorStop(1, 'rgba(120,150,255,0)');
+  gx.fillStyle = gg; gx.fillRect(0, 0, 256, 256);
+  var glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(gc), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+  scene.add(glow);
+
+  /* stars */
+  var starsGeo = new THREE.BufferGeometry(), sp = [], sr = mulberry(5);
+  for (var si = 0; si < 1800; si++) {
+    var th = sr() * 6.2832, ph = Math.acos(2 * sr() - 1), rr = 25 + sr() * 25;
+    sp.push(rr * Math.sin(ph) * Math.cos(th), rr * Math.sin(ph) * Math.sin(th), rr * Math.cos(ph) - 10);
+  }
+  starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
+  var stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({ color: 0xffffff, size: .13, sizeAttenuation: true, transparent: true, opacity: .9, depthWrite: false }));
+  scene.add(stars);
+
+  /* ---------- the phone ---------- */
+  var PW = 1.0, PH = 2.1, LENS_Y = .72;
+  function rrShape(w, h, r, S) {
+    var s = S || new THREE.Shape(), x = -w / 2, y = -h / 2;
+    s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.absarc(x + w - r, y + r, r, -Math.PI / 2, 0, false);
+    s.lineTo(x + w, y + h - r); s.absarc(x + w - r, y + h - r, r, 0, Math.PI / 2, false);
+    s.lineTo(x + r, y + h); s.absarc(x + r, y + h - r, r, Math.PI / 2, Math.PI, false);
+    s.lineTo(x, y + r); s.absarc(x + r, y + r, r, Math.PI, Math.PI * 1.5, false);
+    return s;
+  }
+  function rrPlane(w, h, r) {
+    var g = new THREE.ShapeGeometry(rrShape(w, h, r), 20), uv = g.attributes.uv, pos = g.attributes.position;
+    for (var i = 0; i < uv.count; i++) uv.setXY(i, pos.getX(i) / w + .5, pos.getY(i) / h + .5);
+    return g;
+  }
+  var phone = new THREE.Group(); scene.add(phone);
+  var parts = [];
+  function addPart(obj, z0, z1) { obj.userData.z0 = z0; obj.userData.z1 = z1; obj.position.z = z0; phone.add(obj); parts.push(obj); return obj; }
+
+  /* frame */
+  var fs = rrShape(PW, PH, .13), hole = new THREE.Path(); rrShape(PW - .07, PH - .07, .1, hole); fs.holes.push(hole);
+  var fg = new THREE.ExtrudeGeometry(fs, { depth: .07, bevelEnabled: true, bevelThickness: .012, bevelSize: .012, bevelSegments: 4, curveSegments: 28 });
+  fg.translate(0, 0, -.035);
+  addPart(new THREE.Mesh(fg, new THREE.MeshStandardMaterial({ color: 0x202838, metalness: .75, roughness: .32 })), 0, 0);
+
+  function tex(c) { var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t; }
+  var TW = 1000, TH = 2100, cX = TW / 2, cY = TH / 2 - LENS_Y * 1000;
+
+  function glassTexture() {
+    var c = mk(TW, TH), x = c.getContext('2d'), r = mulberry(3), i;
+    var bg = x.createLinearGradient(0, 0, 0, TH); bg.addColorStop(0, '#0b1226'); bg.addColorStop(.5, '#050813'); bg.addColorStop(1, '#02030a');
+    x.fillStyle = bg; x.fillRect(0, 0, TW, TH);
+    blob(x, cX, cY, 520, 'rgba(70,100,190,.30)');
+    blob(x, 780, 1500, 420, 'rgba(120,70,160,.14)');
+    for (i = 0; i < 650; i++) { x.fillStyle = 'rgba(255,255,255,' + (.15 + r() * .6).toFixed(2) + ')'; var s = .6 + r() * 1.8; x.fillRect(r() * TW, r() * TH, s, s); }
+    x.strokeStyle = 'rgba(160,185,255,.18)'; x.lineWidth = 1.2;
+    [150, 250, 345, 420, 480].forEach(function (rad) { x.beginPath(); x.arc(cX, cY, rad, 0, 6.2832); x.stroke(); });
+    for (i = 0; i < 360; i += 5) {                       /* degree ticks */
+      var a = i * Math.PI / 180, big = i % 30 === 0, r0 = 480, r1 = r0 + (big ? 22 : 10);
+      x.strokeStyle = 'rgba(190,205,255,' + (big ? .45 : .2) + ')'; x.beginPath();
+      x.moveTo(cX + Math.cos(a) * r0, cY + Math.sin(a) * r0); x.lineTo(cX + Math.cos(a) * r1, cY + Math.sin(a) * r1); x.stroke();
+    }
+    x.strokeStyle = 'rgba(190,205,255,.10)';
+    for (i = 0; i < 360; i += 30) { var q = i * Math.PI / 180; x.beginPath(); x.moveTo(cX + Math.cos(q) * 70, cY + Math.sin(q) * 70); x.lineTo(cX + Math.cos(q) * 480, cY + Math.sin(q) * 480); x.stroke(); }
+    x.textAlign = 'center';
+    x.fillStyle = 'rgba(210,222,255,.5)'; x.font = '500 21px "Inter", system-ui, sans-serif';
+    if ('letterSpacing' in x) x.letterSpacing = '6px';
+    x.fillText('ORBIT GLASS  /  3 LAYERS  /  6.9 MM', cX, 1530);
+    x.font = '500 19px "Inter", system-ui, sans-serif';
+    if ('letterSpacing' in x) x.letterSpacing = '4px';
+    x.fillText('ULTRA  114\u00B0', 260, 1118); x.fillText('FLASH', 500, 1118); x.fillText('TELE  3\u00D7', 740, 1118);
+    x.fillStyle = 'rgba(242,238,230,.92)'; x.font = '300 112px "Sora", system-ui, sans-serif';
+    if ('letterSpacing' in x) x.letterSpacing = '14px';
+    x.fillText('MOON', cX + 7, 1900);
+    x.fillStyle = '#D8C6A4'; x.fillRect(cX - 22, 1938, 44, 3);
+    return tex(c);
+  }
+  var glass = addPart(new THREE.Mesh(rrPlane(PW - .03, PH - .03, .105),
+    new THREE.MeshStandardMaterial({ map: glassTexture(), roughness: .22, metalness: .35, transparent: true, side: THREE.DoubleSide })), .047, .3);
+
+  /* orbit layers around the lens */
+  var planets = [];
+  function orbitLayer(spec, z0, z1) {
+    var g = new THREE.Group(); g.position.set(0, LENS_Y, 0);
+    var holder = new THREE.Group(); holder.position.set(0, -LENS_Y, 0); // so addPart positions only z
+    spec.rings.forEach(function (rg) {
+      var pts = [], n = 160, i;
+      for (i = 0; i < n; i++) { var a = i / n * 6.2832; pts.push(new THREE.Vector3(Math.cos(a) * rg.r, Math.sin(a) * rg.r * rg.k, 0)); }
+      var line = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: 0xbcd0ff, transparent: true, opacity: rg.o || .5 }));
+      line.rotation.z = rg.rot || 0; g.add(line);
+      var mat = new THREE.MeshStandardMaterial({ color: rg.col, emissive: rg.col, emissiveIntensity: .35, roughness: .8 });
+      var pl = new THREE.Mesh(new THREE.SphereGeometry(rg.pr, 28, 20), mat);
+      var pivot = new THREE.Group(); pivot.rotation.z = rg.rot || 0; pivot.add(pl); g.add(pivot);
+      if (rg.saturn) {
+        var rm = new THREE.Mesh(new THREE.RingGeometry(rg.pr * 1.45, rg.pr * 2.2, 48), new THREE.MeshBasicMaterial({ color: 0xd9c28f, transparent: true, opacity: .75, side: THREE.DoubleSide }));
+        rm.rotation.x = 1.15; pl.add(rm);
+      }
+      planets.push({ mesh: pl, r: rg.r, k: rg.k, sp: rg.sp, a0: rg.a0 });
+    });
+    if (spec.belt) {
+      var bp = [], br = mulberry(21);
+      for (var j = 0; j < 260; j++) { var ba = br() * 6.2832, bR = spec.belt + (br() - .5) * .035; bp.push(Math.cos(ba) * bR, Math.sin(ba) * bR * .92, (br() - .5) * .012); }
+      var bg = new THREE.BufferGeometry(); bg.setAttribute('position', new THREE.Float32BufferAttribute(bp, 3));
+      g.add(new THREE.Points(bg, new THREE.PointsMaterial({ color: 0xcfd6e6, size: .006, transparent: true, opacity: .8 })));
+    }
+    holder.add(g); return addPart(holder, z0, z1);
+  }
+  /* planets orbit in the layer plane; ring rotation (rot) tilts the ellipse inside that plane */
+  var L1 = orbitLayer({ rings: [{ r: .19, k: 1, pr: .014, col: 0xb7b2a8, sp: 1.9, a0: 0 }, { r: .285, k: 1, pr: .022, col: 0x4f86d8, sp: 1.25, a0: 2.1 }], belt: null }, .05, .5);
+  var L2 = orbitLayer({ rings: [{ r: .365, k: .86, pr: .02, col: 0xd2603f, sp: .85, a0: 4.0, rot: .5 }], belt: .43 }, .10, .72);
+  var L3 = orbitLayer({ rings: [{ r: .445, k: .9, pr: .03, col: 0xd8b878, sp: .55, a0: 1.0, rot: -.35, saturn: true, o: .38 }], belt: null }, .16, .95);
+
+  /* ---------- the camera: a real multi-element lens, not the moon ---------- */
+  function lensGlassTexture() {
+    var s = 512, c = mk(s, s), x = c.getContext('2d'), ctr = s / 2, i;
+    x.clearRect(0, 0, s, s);
+    var g = x.createRadialGradient(ctr * .82, ctr * .74, 8, ctr, ctr, ctr);
+    g.addColorStop(0, '#0a1424'); g.addColorStop(.35, '#0b1b33'); g.addColorStop(.62, '#07101d'); g.addColorStop(1, '#03060b');
+    x.fillStyle = g; x.beginPath(); x.arc(ctr, ctr, ctr * .99, 0, 6.2832); x.fill();
+    /* anti-reflective coating: the rings a real lens throws back at you */
+    [[.93, 'rgba(120,190,255,.30)'], [.79, 'rgba(150,120,255,.22)'], [.64, 'rgba(120,220,190,.18)'], [.47, 'rgba(255,190,120,.12)']].forEach(function (rg) {
+      x.strokeStyle = rg[1]; x.lineWidth = ctr * .028; x.beginPath(); x.arc(ctr, ctr, ctr * rg[0], 0, 6.2832); x.stroke();
+    });
+    /* nine aperture blades around the opening */
+    x.save(); x.translate(ctr, ctr);
+    for (i = 0; i < 9; i++) {
+      x.save(); x.rotate(i / 9 * 6.2832);
+      x.beginPath(); x.moveTo(ctr * .17, -ctr * .07); x.lineTo(ctr * .55, -ctr * .17); x.lineTo(ctr * .55, ctr * .17); x.closePath();
+      x.fillStyle = 'rgba(7,11,19,.88)'; x.fill();
+      x.strokeStyle = 'rgba(150,180,225,.12)'; x.lineWidth = 2; x.stroke();
+      x.restore();
+    }
+    x.restore();
+    /* two specular highlights and the sensor reflection deep in the barrel */
+    x.fillStyle = 'rgba(255,255,255,.5)'; x.beginPath(); x.ellipse(ctr * .74, ctr * .64, 44, 15, -.7, 0, 6.2832); x.fill();
+    x.fillStyle = 'rgba(180,215,255,.32)'; x.beginPath(); x.ellipse(ctr * .6, ctr * .78, 11, 24, -.7, 0, 6.2832); x.fill();
+    x.fillStyle = 'rgba(255,225,190,.45)'; x.beginPath(); x.arc(ctr * 1.04, ctr * 1.05, 8, 0, 6.2832); x.fill();
+    return tex(c);
+  }
+  function buildLens() {
+    var g = new THREE.Group(); g.position.set(0, LENS_Y, 0);
+    var R = .148;
+    var barrelMat = new THREE.MeshStandardMaterial({ color: 0x1a1f27, metalness: .95, roughness: .32 });
+    var steelMat = new THREE.MeshStandardMaterial({ color: 0x9aa4b2, metalness: 1, roughness: .22 });
+    var blackMat = new THREE.MeshStandardMaterial({ color: 0x05070b, metalness: .8, roughness: .38 });
+
+    /* barrel wall */
+    var barrel = new THREE.Mesh(new THREE.CylinderGeometry(R * .99, R * 1.03, .075, 72, 1, true), barrelMat);
+    barrel.rotation.x = Math.PI / 2; barrel.position.z = .004; g.add(barrel);
+
+    /* machined outer ring and the black inner bezel */
+    var outer = new THREE.Mesh(new THREE.TorusGeometry(R, .016, 16, 84), steelMat);
+    outer.position.z = .04; g.add(outer);
+    var bezel = new THREE.Mesh(new THREE.TorusGeometry(R * .88, .011, 14, 72), blackMat);
+    bezel.position.z = .046; g.add(bezel);
+
+    /* two glass elements, the front one coated */
+    var glassMat = new THREE.MeshStandardMaterial({ map: lensGlassTexture(), metalness: .92, roughness: .08,
+      emissive: 0x0b1a2e, emissiveIntensity: .35, side: THREE.DoubleSide });
+    var element = new THREE.Mesh(new THREE.CircleGeometry(R * .86, 64), glassMat);
+    element.position.z = .045; g.add(element);
+    var element2 = new THREE.Mesh(new THREE.CircleGeometry(R * .56, 48),
+      new THREE.MeshStandardMaterial({ color: 0x060c16, metalness: .9, roughness: .16, emissive: 0x08121f, emissiveIntensity: .5 }));
+    element2.position.z = .022; g.add(element2);
+
+    /* iris: the black disc that the moon lifts away from */
+    var irisMat = new THREE.MeshBasicMaterial({ color: 0x04060a, transparent: true, opacity: 1, depthWrite: false });
+    var iris = new THREE.Mesh(new THREE.CircleGeometry(R * .9, 48), irisMat);
+    iris.position.z = .056; g.add(iris);
+
+    /* champagne rim light at the moment the lens is exposed */
+    var rimMat = new THREE.MeshBasicMaterial({ color: 0xd8c6a4, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+    var rimGlow = new THREE.Mesh(new THREE.RingGeometry(R * .95, R * 1.12, 72), rimMat);
+    rimGlow.position.z = .05; g.add(rimGlow);
+
+    /* knurled focus ring */
+    var toothGeo = new THREE.BoxGeometry(.006, .006, .018);
+    for (var i = 0; i < 64; i++) {
+      var a = i / 64 * 6.2832, tooth = new THREE.Mesh(toothGeo, steelMat);
+      tooth.position.set(Math.cos(a) * R * 1.02, Math.sin(a) * R * 1.02, .028);
+      tooth.rotation.z = a; g.add(tooth);
+    }
+    return { group: g, iris: iris, irisMat: irisMat, rim: rimGlow, rimMat: rimMat, glassMat: glassMat };
+  }
+  var lens = buildLens(), lensHolder = new THREE.Group();
+  lensHolder.add(lens.group);
+  addPart(lensHolder, .062, .6);
+
+  /* internals */
+  function plateTexture(kind) {
+    var c = mk(TW, TH), x = c.getContext('2d'), r = mulberry(kind === 'board' ? 9 : 4), i;
+    if (kind === 'battery') {
+      x.fillStyle = '#4a5360'; x.fillRect(0, 0, TW, TH);
+      var gr = x.createLinearGradient(0, 0, TW, 0); gr.addColorStop(0, 'rgba(255,255,255,.12)'); gr.addColorStop(.5, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(0,0,0,.25)');
+      x.fillStyle = gr; x.fillRect(0, 0, TW, TH);
+      x.fillStyle = '#e8edf3'; x.font = '300 104px "Sora", system-ui, sans-serif'; x.textAlign = 'center'; x.fillText('5,500 MAH', cX, 1020);
+      x.font = '500 30px "Inter", system-ui, sans-serif'; x.fillStyle = 'rgba(232,237,243,.7)'; x.fillText('3.87 V  /  21.3 WH  /  120 W SILICON-CARBON', cX, 1080);
+      x.fillStyle = '#D8C6A4'; x.fillRect(cX - 60, 1110, 120, 4);
+    } else {
+      /* a real phone PCB: dark solder mask, copper routing, cans, connectors, silkscreen */
+      x.fillStyle = '#0a1411'; x.fillRect(0, 0, TW, TH);
+      x.strokeStyle = 'rgba(120,150,120,.07)'; x.lineWidth = 2;
+      for (i = -TH; i < TW; i += 26) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i + TH, TH); x.stroke(); }
+      /* 45-degree copper traces with vias at each end */
+      for (i = 0; i < 220; i++) {
+        var px = r() * TW, py = r() * TH, l1 = (r() - .5) * 260, l2 = (r() - .5) * 260;
+        x.strokeStyle = 'rgba(196,150,84,' + (.16 + r() * .3).toFixed(2) + ')'; x.lineWidth = .8 + r() * 2.2;
+        x.beginPath(); x.moveTo(px, py); x.lineTo(px + l1, py); x.lineTo(px + l1, py + l2); x.stroke();
+        x.fillStyle = 'rgba(214,176,110,.5)'; x.beginPath(); x.arc(px, py, 2.4, 0, 6.2832); x.fill();
+        x.beginPath(); x.arc(px + l1, py + l2, 2.4, 0, 6.2832); x.fill();
+      }
+      for (i = 0; i < 300; i++) { x.fillStyle = 'rgba(200,170,110,.32)'; x.beginPath(); x.arc(r() * TW, r() * TH, 2.2, 0, 6.2832); x.fill(); }
+      /* shielding cans and packages */
+      [[120, 240, 300, 210], [700, 300, 240, 190], [150, 780, 250, 170], [640, 700, 300, 230], [110, 1560, 260, 210], [660, 1500, 260, 300]].forEach(function (b) {
+        x.fillStyle = 'rgba(40,48,58,.95)'; x.fillRect(b[0], b[1], b[2], b[3]);
+        x.strokeStyle = 'rgba(150,165,180,.22)'; x.lineWidth = 2; x.strokeRect(b[0] + 5, b[1] + 5, b[2] - 10, b[3] - 10);
+      });
+      /* passives */
+      for (i = 0; i < 200; i++) {
+        var qx = r() * TW, qy = r() * TH, qw = 10 + r() * 16, qh = 6 + r() * 10;
+        x.fillStyle = r() < .5 ? '#3c4450' : '#8b6b3f'; x.fillRect(qx, qy, qw, qh);
+        x.fillStyle = 'rgba(220,225,235,.3)'; x.fillRect(qx, qy, 3, qh); x.fillRect(qx + qw - 3, qy, 3, qh);
+      }
+      /* flex connectors */
+      for (i = 0; i < 4; i++) {
+        var cy = 240 + i * 520;
+        x.fillStyle = '#1b1f26'; x.fillRect(60, cy, 120, 34);
+        x.fillStyle = '#b08b4f'; for (var pj = 0; pj < 12; pj++) x.fillRect(66 + pj * 9, cy + 6, 4, 22);
+      }
+      /* silkscreen */
+      x.textAlign = 'left'; x.fillStyle = 'rgba(226,232,240,.72)';
+      x.font = '500 26px "Inter", system-ui, sans-serif';
+      x.fillText('MOON ONE  ·  MAIN BOARD  ·  REV B', 120, 128);
+      x.fillStyle = 'rgba(216,198,164,.85)'; x.font = '500 24px "Inter", system-ui, sans-serif';
+      x.fillText('SNAPDRAGON 8 ELITE GEN 6', 120, 190);
+      x.fillText('LPDDR5X  ·  UFS 4.1  ·  PMIC', 120, 222);
+      x.fillText('5G  ·  WI-FI 8  ·  BT 6.0', 120, 254);
+      /* the SoC socket under the chip */
+      x.fillStyle = '#0b0f14'; x.fillRect(370, 590, 260, 230);
+      x.strokeStyle = 'rgba(216,198,164,.32)'; x.lineWidth = 3; x.strokeRect(378, 598, 244, 214);
+      x.fillStyle = 'rgba(232,237,243,.6)'; x.textAlign = 'center'; x.font = '500 25px "Inter", system-ui, sans-serif';
+      x.fillText('SoC', 500, 712); x.textAlign = 'left';
+    }
+    return tex(c);
+  }
+  /* battery sits in the lower half so the chip and cooler above it stay visible when the layers split */
+  var CHIPY = .43, BATY = -.45;
+  function batteryTextures() {
+    var w = 840, h = 980, c = mk(w, h), x = c.getContext('2d'), e = mk(w, h), y = e.getContext('2d'), i;
+    var g = x.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#5d6673'); g.addColorStop(.5, '#3f4853'); g.addColorStop(1, '#2a323c');
+    x.fillStyle = g; x.fillRect(0, 0, w, h);
+    x.strokeStyle = 'rgba(255,255,255,.07)'; x.lineWidth = 2;
+    for (i = 40; i < w; i += 40) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, h); x.stroke(); }
+    y.fillStyle = '#000'; y.fillRect(0, 0, w, h);
+    x.textAlign = 'center'; x.fillStyle = '#e8edf3'; x.font = '300 132px "Sora", system-ui, sans-serif'; x.fillText('5,500 MAH', w / 2, 330);
+    x.font = '500 27px "Inter", system-ui, sans-serif'; x.fillStyle = 'rgba(232,237,243,.75)';
+    x.fillText('3.87 V  /  21.3 WH  /  SILICON-CARBON  /  2 CELLS', w / 2, 385);
+    for (i = 0; i < 12; i++) {
+      var sx = 66 + i * 60, on = i < 9;
+      x.fillStyle = on ? '#D8C6A4' : '#262219'; x.fillRect(sx, 520, 46, 130);
+      y.fillStyle = on ? '#D8C6A4' : '#000'; y.fillRect(sx, 520, 46, 130);
+    }
+    x.fillStyle = '#e8edf3'; x.font = '300 84px "Sora", system-ui, sans-serif'; x.fillText('120 W', w / 2, 800);
+    x.font = '500 25px "Inter", system-ui, sans-serif'; x.fillStyle = 'rgba(232,237,243,.7)'; x.fillText('0 TO 100 IN 28 MIN', w / 2, 850);
+    return { map: tex(c), em: tex(e) };
+  }
+  var batTx = batteryTextures();
+  var batMat = new THREE.MeshStandardMaterial({ map: batTx.map, emissive: 0xffffff, emissiveMap: batTx.em, emissiveIntensity: .5, roughness: .45, metalness: .35, side: THREE.DoubleSide });
+  var battery = new THREE.Mesh(rrPlane(PW - .16, .98, .07), batMat);
+  battery.position.set(0, BATY, 0);
+  addPart(battery, .012, -.36);
+  addPart(new THREE.Mesh(rrPlane(PW - .12, PH - .12, .08), new THREE.MeshStandardMaterial({ map: plateTexture("board"), roughness: .5, metalness: .2, side: THREE.DoubleSide })), -.008, -.7);
+
+  function screenTexture() {
+    var c = mk(TW, TH), x = c.getContext('2d');
+    var g = x.createLinearGradient(0, 0, 0, TH); g.addColorStop(0, '#0d1a33'); g.addColorStop(1, '#04060c'); x.fillStyle = g; x.fillRect(0, 0, TW, TH);
+    blob(x, 500, 1250, 420, 'rgba(236,232,225,.22)');
+    var mg = x.createRadialGradient(440, 1200, 10, 500, 1260, 190); mg.addColorStop(0, '#fffdf6'); mg.addColorStop(1, '#9d978a');
+    x.fillStyle = mg; x.beginPath(); x.arc(500, 1260, 170, 0, 6.2832); x.fill();
+    x.fillStyle = '#ecf0f5'; x.textAlign = 'center'; x.font = '200 300px "Sora", system-ui, sans-serif'; x.fillText('21:34', 500, 520);
+    x.fillStyle = '#D8C6A4'; x.font = '500 40px "Inter", system-ui, sans-serif';
+    if ('letterSpacing' in x) x.letterSpacing = '10px';
+    x.fillText('TUE 3 NOV', 500, 600);
+    x.fillStyle = 'rgba(255,255,255,.1)'; x.fillRect(140, 1700, 330, 150); x.fillRect(530, 1700, 330, 150);
+    x.fillStyle = '#ecf0f5'; x.font = '500 34px "Inter", system-ui, sans-serif'; x.fillText('NIGHT ON', 305, 1790); x.fillText('144 HZ', 695, 1790);
+    return tex(c);
+  }
+  var screenMat = new THREE.MeshStandardMaterial({ map: screenTexture(), emissive: 0xffffff, emissiveMap: null, emissiveIntensity: .0, roughness: .16, metalness: .3, side: THREE.DoubleSide });
+  /* the front is curved: the glass bends into the frame at both edges */
+  function curvedPanel(w, h, segX, segY, curve) {
+    var g = new THREE.PlaneGeometry(w, h, segX, segY), pos = g.attributes.position, uv = g.attributes.uv, hw = w / 2, i;
+    for (i = 0; i < pos.count; i++) {
+      var t = clamp(pos.getX(i) / hw, -1, 1);
+      pos.setZ(i, curve * Math.pow(Math.abs(t), 2.6));
+      uv.setX(i, 1 - uv.getX(i));       /* the panel is turned to face the front, so mirror U back */
+    }
+    pos.needsUpdate = true; uv.needsUpdate = true; g.computeVertexNormals();
+    return g;
+  }
+  var display = new THREE.Mesh(curvedPanel(PW - .02, PH - .02, 44, 88, .055), screenMat);
+  display.rotation.y = Math.PI;                    /* faces the front (-z) */
+  addPart(display, -.034, -.95);
+
+  screenMat.emissiveMap = screenMat.map; screenMat.emissiveIntensity = .55;
+
+  /* ---------- processor ---------- */
+  function chipTexture() {
+    var c = mk(512, 512), x = c.getContext('2d'), i;
+    var g = x.createLinearGradient(0, 0, 512, 512); g.addColorStop(0, '#1d2530'); g.addColorStop(1, '#0a0d12');
+    x.fillStyle = g; x.fillRect(0, 0, 512, 512);
+    x.strokeStyle = 'rgba(214,170,90,.8)'; x.lineWidth = 3; x.strokeRect(26, 26, 460, 460);
+    x.strokeStyle = 'rgba(214,170,90,.22)'; x.lineWidth = 2;
+    for (i = 1; i < 6; i++) x.strokeRect(26 + i * 22, 26 + i * 22, 460 - i * 44, 460 - i * 44);
+    x.textAlign = 'center';
+    x.fillStyle = '#e8edf3'; x.font = '300 58px "Sora", system-ui, sans-serif';
+    if ('letterSpacing' in x) x.letterSpacing = '6px';
+    x.fillText('SNAPDRAGON', 256, 232);
+    x.fillStyle = '#D8C6A4'; x.font = '300 74px "Sora", system-ui, sans-serif';
+    if ('letterSpacing' in x) x.letterSpacing = '1px';
+    x.fillText('8 ELITE GEN 6', 256, 302);
+    x.fillStyle = 'rgba(232,237,243,.62)'; x.font = '500 22px "Inter", system-ui, sans-serif';
+    if ('letterSpacing' in x) x.letterSpacing = '4px';
+    x.fillText('2 NM  /  ORYON V4  /  ADRENO', 256, 348);
+    return tex(c);
+  }
+  var chipSide = new THREE.MeshStandardMaterial({ color: 0x20262e, metalness: .8, roughness: .35 });
+  var chipTop = new THREE.MeshStandardMaterial({ map: chipTexture(), metalness: .55, roughness: .3, emissive: 0xd8c6a4, emissiveIntensity: .1 });
+  var chipG = new THREE.Group(); chipG.position.y = CHIPY;
+  var chipBox = new THREE.Mesh(new THREE.BoxGeometry(.34, .34, .035), [chipSide, chipSide, chipSide, chipSide, chipTop, chipSide]);
+  chipG.add(chipBox);
+  var smallMat = new THREE.MeshStandardMaterial({ color: 0x151a21, metalness: .7, roughness: .4 });
+  [[-.3, .2, .14, .1], [.3, .2, .14, .1], [-.3, -.2, .12, .12], [.3, -.2, .12, .12]].forEach(function (s) {
+    var m = new THREE.Mesh(new THREE.BoxGeometry(s[2], s[3], .025), smallMat); m.position.set(s[0], s[1], -.005); chipG.add(m);
+  });
+  var cr = mulberry(77);
+  for (var ci = 0; ci < 18; ci++) {
+    var cm = new THREE.Mesh(new THREE.BoxGeometry(.03, .016, .012), new THREE.MeshStandardMaterial({ color: 0xc9a45c, metalness: .9, roughness: .3 }));
+    cm.position.set((cr() - .5) * .8, (cr() - .5) * .56, -.012); chipG.add(cm);
+  }
+  addPart(chipG, .02, -.62);
+
+  /* ---------- cooling: a copper vapour chamber over the chip ---------- */
+  function coolTextures() {
+    var w = 860, h = 700, c = mk(w, h), x = c.getContext('2d'), e = mk(w, h), y = e.getContext('2d'), r = mulberry(31), i;
+    var g = x.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, '#c98a52'); g.addColorStop(.45, '#a9673a'); g.addColorStop(1, '#6d3d21');
+    x.fillStyle = g; x.fillRect(0, 0, w, h);
+    /* brushed copper grain */
+    x.strokeStyle = 'rgba(255,235,210,.06)'; x.lineWidth = 1;
+    for (i = 0; i < h; i += 3) { x.beginPath(); x.moveTo(0, i); x.lineTo(w, i + (r() - .5) * 4); x.stroke(); }
+    y.fillStyle = '#000'; y.fillRect(0, 0, w, h);
+    /* stamped wick serpentine */
+    function serp(ctx, col, lw) {
+      ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(70, 90);
+      for (var k = 0; k < 6; k++) { var ex = k % 2 === 0 ? 790 : 70; ctx.lineTo(ex, 90 + k * 105); if (k < 5) ctx.lineTo(ex, 90 + (k + 1) * 105); }
+      ctx.stroke();
+    }
+    serp(x, 'rgba(48,24,12,.55)', 22); serp(x, 'rgba(255,226,190,.16)', 8);
+    serp(y, 'rgba(120,215,255,.5)', 5);
+    x.strokeStyle = 'rgba(60,30,16,.5)'; x.lineWidth = 3; x.strokeRect(40, 40, w - 80, h - 80);
+    /* stamped plate detail */
+    x.fillStyle = 'rgba(38,18,10,.82)'; x.fillRect(175, 262, 510, 150);
+    x.fillStyle = '#ffe9d2'; x.textAlign = 'center'; x.font = '300 66px "Sora", system-ui, sans-serif'; x.fillText('6,400 MM²', 430, 330);
+    x.fillStyle = '#f0c79a'; x.font = '500 22px "Inter", system-ui, sans-serif';
+    if ('letterSpacing' in x) x.letterSpacing = '2px';
+    x.fillText('VAPOUR CHAMBER  /  0.35 MM COPPER', 430, 372);
+    x.fillStyle = 'rgba(255,238,220,.5)'; x.font = '500 18px "Inter", system-ui, sans-serif';
+    x.fillText('STAMPED WICK  ·  GRAPHITE SHEET  ·  6 CELLS', 430, 402);
+    /* frost condensing on the cold plate */
+    for (i = 0; i < 900; i++) {
+      var fx = r() * w, fy = r() * h, s = 1 + r() * 2.5;
+      x.fillStyle = 'rgba(255,255,255,' + (.05 + r() * .35).toFixed(2) + ')'; x.fillRect(fx, fy, s, s);
+      if (r() < .35) { y.fillStyle = 'rgba(150,225,255,' + (.15 + r() * .45).toFixed(2) + ')'; y.fillRect(fx, fy, s + 1, s + 1); }
+    }
+    return { map: tex(x.canvas), em: tex(y.canvas) };
+  }
+  var coolTx = coolTextures();
+  var coolMat = new THREE.MeshStandardMaterial({ map: coolTx.map, emissive: 0x7fd0ff, emissiveMap: coolTx.em, emissiveIntensity: .35, roughness: .3, metalness: .85, side: THREE.DoubleSide });
+  var coolG = new THREE.Group(); coolG.position.y = CHIPY;
+  coolG.add(new THREE.Mesh(rrPlane(.86, .7, .07), coolMat));
+  var cgc = mk(256, 256), cgx = cgc.getContext('2d'), cgg = cgx.createRadialGradient(128, 128, 10, 128, 128, 128);
+  cgg.addColorStop(0, 'rgba(140,220,255,.9)'); cgg.addColorStop(1, 'rgba(60,160,255,0)'); cgx.fillStyle = cgg; cgx.fillRect(0, 0, 256, 256);
+  var coolGlow = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.45), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cgc), transparent: true, opacity: .3, depthWrite: false, blending: THREE.AdditiveBlending }));
+  coolGlow.position.z = -.03; coolG.add(coolGlow);
+  var frostN = 170, frostBase = [], fp = [], fr = mulberry(8);
+  for (var fi0 = 0; fi0 < frostN; fi0++) { var fy0 = (fr() - .5) * .8; frostBase.push(fy0); fp.push((fr() - .5) * .95, fy0, .02 + fr() * .14); }
+  var frostGeo = new THREE.BufferGeometry(); frostGeo.setAttribute('position', new THREE.Float32BufferAttribute(fp, 3));
+  var frostPos = frostGeo.attributes.position;
+  coolG.add(new THREE.Points(frostGeo, new THREE.PointsMaterial({ color: 0xe6f8ff, size: .014, transparent: true, opacity: .85, depthWrite: false })));
+  addPart(coolG, .0, -.5);
+
+  /* ---------- camera module: wide, macro and a dual-tone flash, in a row under the moon ---------- */
+  var MODY = .06;
+  function lensTexture(hue) {
+    var s = 256, c = mk(s, s), x = c.getContext('2d'), g = x.createRadialGradient(s * .42, s * .38, 4, s / 2, s / 2, s / 2);
+    g.addColorStop(0, 'hsl(' + hue + ',75%,40%)'); g.addColorStop(.4, 'hsl(' + (hue + 35) + ',60%,15%)'); g.addColorStop(.85, '#04050a'); g.addColorStop(1, '#000');
+    x.fillStyle = g; x.fillRect(0, 0, s, s);
+    x.strokeStyle = 'rgba(190,205,255,.22)'; x.lineWidth = 2;
+    [.88, .66, .46, .28].forEach(function (k) { x.beginPath(); x.arc(s / 2, s / 2, s / 2 * k, 0, 6.2832); x.stroke(); });
+    x.fillStyle = 'rgba(255,255,255,.5)'; x.beginPath(); x.ellipse(s * .36, s * .3, 22, 9, -.6, 0, 6.2832); x.fill();
+    return tex(c);
+  }
+  function makeLens(r, hue, px) {
+    var g = new THREE.Group(); g.position.set(px, MODY, 0);
+    var bez = new THREE.MeshStandardMaterial({ color: 0x0a0c11, metalness: .85, roughness: .28 });
+    g.add(new THREE.Mesh(new THREE.TorusGeometry(r, r * .13, 16, 56), bez));
+    var outer = new THREE.Mesh(new THREE.TorusGeometry(r * 1.2, r * .035, 10, 56), new THREE.MeshStandardMaterial({ color: 0x8d99a6, metalness: .95, roughness: .25 }));
+    g.add(outer);
+    var disc = new THREE.Mesh(new THREE.CircleGeometry(r * .98, 48), new THREE.MeshStandardMaterial({ map: lensTexture(hue), metalness: .5, roughness: .12 }));
+    disc.position.z = .004; g.add(disc);
+    var inner = new THREE.Mesh(new THREE.TorusGeometry(r * .5, r * .03, 8, 40), bez); inner.position.z = .008; g.add(inner);
+    return g;
+  }
+  var camG = new THREE.Group();
+  camG.add(makeLens(.075, 235, -.24));
+  camG.add(makeLens(.055, 140, .24));
+  var flashG = new THREE.Group(); flashG.position.set(0, MODY, 0);
+  flashG.add(new THREE.Mesh(rrPlane(.2, .08, .04), new THREE.MeshStandardMaterial({ color: 0x0a0c11, metalness: .8, roughness: .3, side: THREE.DoubleSide })));
+  var flashMats = [];
+  [[-.045, 0xffd49a], [.045, 0xd2e6ff]].forEach(function (f) {
+    var m = new THREE.MeshStandardMaterial({ color: f[1], emissive: f[1], emissiveIntensity: .12, roughness: .4 }); flashMats.push(m);
+    var led = new THREE.Mesh(new THREE.CircleGeometry(.027, 32), m); led.position.set(f[0], 0, .003); flashG.add(led);
+  });
+  camG.add(flashG);
+  var flashLight = new THREE.PointLight(0xfff0d8, 0, 3); flashLight.position.set(0, MODY, .9); phone.add(flashLight);
+  addPart(camG, .062, .82);
+
+  /* ---------- side: graduated rail with milled ticks, side light, buttons ---------- */
+  var sideG = new THREE.Group(), tickMat = new THREE.MeshStandardMaterial({ color: 0xb4c0d2, metalness: .9, roughness: .3 });
+  var majMat = new THREE.MeshStandardMaterial({ color: 0xd8c6a4, emissive: 0xd8c6a4, emissiveIntensity: .32, roughness: .5 });
+  for (var ti = -19; ti <= 19; ti++) {
+    var maj = ti % 5 === 0, tm = new THREE.Mesh(new THREE.BoxGeometry(.012, maj ? .018 : .01, maj ? .05 : .03), maj ? majMat : tickMat);
+    tm.position.set(.512, ti * .05, 0); sideG.add(tm);
+  }
+  var btnMat = new THREE.MeshStandardMaterial({ color: 0x2c3646, metalness: .85, roughness: .3 });
+  [[.30, .16], [.04, .3]].forEach(function (b) { var bm = new THREE.Mesh(new THREE.BoxGeometry(.03, b[1], .045), btnMat); bm.position.set(.522, b[0], 0); sideG.add(bm); });
+  var slider = new THREE.Mesh(new THREE.BoxGeometry(.026, .09, .04), btnMat); slider.position.set(-.52, .5, 0); sideG.add(slider);
+  var sideSegs = [];
+  for (var si2 = 0; si2 < 28; si2++) {
+    var sm2 = new THREE.MeshStandardMaterial({ color: 0xcdeeff, emissive: 0x7fd6ff, emissiveIntensity: .5, roughness: .4 });
+    var seg = new THREE.Mesh(new THREE.BoxGeometry(.012, .052, .022), sm2); seg.position.set(-.514, -.66 + si2 * .0525 - .02 + .02, 0); sideG.add(seg); sideSegs.push(sm2);
+  }
+  addPart(sideG, 0, 0);
+
+  /* the rim and side stay put while layers split; every other part can fade */
+  parts[0].userData.keep = true; sideG.userData.keep = true;
+  parts.forEach(function (o) {
+    o.userData.mats = [];
+    o.traverse(function (n) {
+      if (!n.material) return;
+      [].concat(n.material).forEach(function (m) {
+        if (m.userData.bo === undefined) { m.userData.bo = m.opacity; m.userData.tr = m.transparent; }
+        o.userData.mats.push(m);
+      });
+    });
+  });
+  moonMats.forEach(function (m) { m.transparent = false; m.opacity = 1; });
+
+  /* ---------- layout & input ---------- */
+  var W = 1, H = 1, aspect = 1, K = 1;
+  function resize() {
+    W = stage.clientWidth; H = stage.clientHeight; aspect = W / H;
+    renderer.setSize(W, H, false); camera.aspect = aspect;
+    K = aspect < .8 ? 1.5 : aspect < 1.2 ? 1.2 : 1;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize); resize();
+  var ptx = 0, pty = 0, ptsx = 0, ptsy = 0;
+  window.addEventListener('pointermove', function (e) {
+    ptx = (e.clientX / window.innerWidth - .5) * 2; pty = (e.clientY / window.innerHeight - .5) * 2;
+  }, { passive: true });
+
+  var tmp = new THREE.Vector3(), tgt = new THREE.Vector3(), heroPos = new THREE.Vector3(), finalPos = new THREE.Vector3(), clock = new THREE.Clock();
+  var phoneVisibleLast = null;
+
+  /* ---------- camera tour: one keyframe per component, in phone space ----------
+     ry/rx/rz = phone rotation, d = camera distance, t* = point looked at (exploded depth),
+     fz = depth of the focused layer (layers in front of it fade away), sx = sideways shift so text and part never overlap */
+  var KEYS = [
+    { p: .50, ry: -.72, rx: .3, rz: .08, d: 5.8, tx: 0, ty: 0, tz: 0, fz: 3, sx: 0 },
+    { p: .54, ry: -.22, rx: .10, rz: 0, d: 2.0, tx: 0, ty: .12, tz: .82, fz: .85, sx: .34 },
+    { p: .58, ry: -.22, rx: .10, rz: 0, d: 2.0, tx: 0, ty: .12, tz: .82, fz: .85, sx: .34 },
+    { p: .62, ry: .2, rx: .08, rz: 0, d: 2.1, tx: 0, ty: CHIPY, tz: -.62, fz: -.62, sx: -.34 },
+    { p: .66, ry: .2, rx: .08, rz: 0, d: 2.1, tx: 0, ty: CHIPY, tz: -.62, fz: -.62, sx: -.34 },
+    { p: .70, ry: -.18, rx: -.08, rz: 0, d: 2.2, tx: 0, ty: CHIPY, tz: -.5, fz: -.5, sx: .34 },
+    { p: .735, ry: -.18, rx: -.08, rz: 0, d: 2.2, tx: 0, ty: CHIPY, tz: -.5, fz: -.5, sx: .34 },
+    { p: .78, ry: .2, rx: .08, rz: 0, d: 2.3, tx: 0, ty: BATY, tz: -.36, fz: -.36, sx: -.34 },
+    { p: .815, ry: .2, rx: .08, rz: 0, d: 2.3, tx: 0, ty: BATY, tz: -.36, fz: -.36, sx: -.34 },
+    { p: .86, ry: Math.PI - .22, rx: .06, rz: 0, d: 3.6, tx: 0, ty: 0, tz: -.95, fz: 3, sx: .34 },
+    { p: .905, ry: Math.PI - .22, rx: .06, rz: 0, d: 3.6, tx: 0, ty: 0, tz: -.95, fz: 3, sx: .34 },
+    { p: .93, ry: Math.PI, rx: 0, rz: 0, d: 5.8, tx: 0, ty: 0, tz: 0, fz: 3, sx: 0 }
+  ];
+  var pose = {}, POSE_KEYS = ['ry', 'rx', 'rz', 'd', 'tx', 'ty', 'tz', 'fz', 'sx'];
+  function keyPose(p) {
+    var n = KEYS.length, a = KEYS[0], b = KEYS[1], i;
+    for (i = 0; i < n - 1; i++) if (p >= KEYS[i].p) { a = KEYS[i]; b = KEYS[i + 1]; }
+    var t = sm(a.p, b.p, p);
+    POSE_KEYS.forEach(function (k) { pose[k] = lerp(a[k], b[k], t); });
+    return pose;
+  }
+  function fadeObj(o, f) {
+    o.visible = f > .01;
+    o.userData.mats.forEach(function (m) { m.opacity = m.userData.bo * f; m.transparent = f < .999 || m.userData.tr; });
+  }
+  var camShift = new THREE.Vector3();
+
+  function frame() {
+    var t = clock.getElapsedTime();
+    readScroll(); pS += (pT - pS) * (reduce ? 1 : .085);
+    var p = pS;
+    var B = sm(.05, .15, p), Bm = sm(.07, .16, p), E = sm(.44, .50, p);
+    var Fm = sm(.915, .975, p), Fp = sm(.92, .985, p), w = sm(.90, .95, p);
+    var Dd = sm(.385, .42, p) - sm(.425, .44, p);
+    var sd = sm(.27, .31, p) - sm(.36, .40, p);
+    ptsx += (ptx - ptsx) * .06; ptsy += (pty - ptsy) * .06;
+
+    /* phone pose: intro -> tilt -> side view -> lens -> exploded tour */
+    var u = clamp((p - .17) / .1, 0, 1), ry, rx, rz, fz = 3;
+    if (p >= .5) { keyPose(p); ry = pose.ry; rx = pose.rx; rz = pose.rz; fz = pose.fz; }
+    else {
+      ry = lerp(1.15, 0, B) + Math.sin(u * 6.2832) * .6 - sd * 1.4 - E * .72;
+      rx = Math.sin(u * 12.566) * .16 + E * .3; rz = E * .08;
+    }
+    var ptr = sm(.2, .3, p) * (1 - Fp) * (1 - .75 * E) * (1 - sd);
+    phone.position.set(0, lerp(-4.4, 0, B) + (-4.6) * Fp, 0);
+    phone.rotation.y = ry + ptsx * .34 * ptr + Math.sin(t * .5) * .03;
+    phone.rotation.x = rx + ptsy * .2 * ptr + Math.sin(t * .4) * .02;
+    phone.rotation.z = rz;
+    var ps = lerp(1, .8, E);
+    phone.scale.setScalar(ps);
+    phone.visible = p > .05 && Fp < .999;
+
+    /* explode, then fade whatever sits in front of the focused layer */
+    parts.forEach(function (o) { o.position.z = lerp(o.userData.z0, o.userData.z1, E); });
+    glass.material.userData.bo = lerp(1, .5, E);
+    parts.forEach(function (o) {
+      if (o.userData.keep) return;
+      fadeObj(o, 1 - E * sm(fz + .03, fz + .12, o.position.z));
+    });
+    if (Fp >= .6) lensHolder.visible = false;
+
+    /* planets */
+    planets.forEach(function (pl) {
+      var a = pl.a0 + t * pl.sp * .5;
+      pl.mesh.position.set(Math.cos(a) * pl.r, Math.sin(a) * pl.r * pl.k, 0);
+    });
+
+    /* component animation: flash, side light, chip heat, cold plate, charge bar */
+    var camW = sm(.52, .545, p) * (1 - sm(.575, .60, p));
+    var chipW = sm(.60, .625, p) * (1 - sm(.655, .68, p));
+    var coolW = sm(.68, .705, p) * (1 - sm(.735, .76, p));
+    var batW = sm(.76, .785, p) * (1 - sm(.815, .84, p));
+    var blink = Math.pow(Math.max(0, Math.sin(t * 2.4)), 14);
+    flashMats.forEach(function (m) { m.emissiveIntensity = .12 + camW * 2.6 * blink; });
+    flashLight.intensity = camW * blink * 2.2;
+    sideSegs.forEach(function (m, i) { m.emissiveIntensity = .3 + .7 * (Math.sin(t * 3 - i * .45) * .5 + .5) + camW * blink * 1.5; });
+    chipTop.emissiveIntensity = .1 + chipW * (.3 + .2 * Math.sin(t * 4));
+    coolMat.emissiveIntensity = .35 + coolW * .6 + .08 * Math.sin(t * 1.6);
+    coolGlow.material.opacity = .25 + coolW * .5;
+    for (var fi = 0; fi < frostN; fi++) frostPos.setY(fi, frostBase[fi] + Math.sin(t * .8 + fi) * .02);
+    frostPos.needsUpdate = true;
+    batMat.emissiveIntensity = .45 + batW * .9 * (.5 + .5 * Math.sin(t * 3));
+    phone.updateMatrixWorld(true);
+
+    /* moon: it lands on the back, the two halves part down the middle, and the camera is inside */
+    heroPos.set(aspect > 1.1 ? 1.75 : 0, aspect > 1.1 ? .05 : 1.05, 0);
+    var heroR = aspect > 1.1 ? 1.3 : 1.05;
+    tgt.set(0, LENS_Y, lerp(.075, .62, E)); phone.localToWorld(tgt);
+    var lensR = .128 * ps;
+    finalPos.set(0, aspect > 1.1 ? 0 : .6, 0);
+    var finalR = aspect > 1.1 ? 1.35 : 1.05;
+    var Rv = sm(.165, .225, p);                       /* the shell parts once it has touched down */
+    var openAmt = Rv * (1 - sm(.895, .95, p));        /* closed again for the finale */
+    var openF = lerp(1 - sm(.206, .252, p), 1, Fm);   /* shells vanish once open, return at the end */
+    moon.position.lerpVectors(heroPos, tgt, Bm);
+    moon.position.z += Math.sin(Bm * Math.PI) * .9;
+    moon.position.lerp(finalPos, Fm);
+    var mr = lerp(heroR, lensR, Bm); mr = lerp(mr, finalR, Fm);
+    mr *= 1 + .04 * Rv * openF;
+    moon.scale.setScalar(mr);
+    moon.rotation.y += reduce ? 0 : .0007;
+    var mf = (1 - E * sm(fz + .03, fz + .12, lensHolder.position.z) * (1 - Fm)) * openF;
+    moonMats.forEach(function (m) { m.opacity = mf; m.transparent = mf < .999; });
+    moon.visible = mf > .01;
+    moonDoors.forEach(function (d) { d.pivot.rotation.y = d.swing * openAmt * 1.35; });
+    glow.position.copy(moon.position); glow.position.z -= .05;
+    glow.scale.setScalar(mr * 3.4);
+    glow.material.opacity = (1 - .5 * w) * lerp(1, .55, Bm) * mf;
+
+    /* behind the parting shells: the iris opens and the coated glass catches the light */
+    lens.irisMat.opacity = 1 - Rv;
+    lens.iris.rotation.z = Rv * 2.4;
+    lens.iris.scale.setScalar(1 + Rv * .18);
+    lens.rim.scale.setScalar(1 + Rv * .95);
+    lens.rimMat.opacity = .85 * Rv * (1 - Rv);
+    lens.glassMat.emissiveIntensity = .35 + .6 * sm(.345, .40, p) * (1 - sm(.47, .53, p));
+
+    /* camera */
+    if (p >= .5) {
+      var d = pose.d * K, sxw = aspect > 1.1 ? pose.sx * .3249 * d * aspect : 0, offY = aspect > 1.1 ? 0 : .16 * d;
+      tmp.set(pose.tx, pose.ty, pose.tz); phone.localToWorld(tmp); tmp.y += 4.6 * Fp;
+      camera.position.set(tmp.x - sxw, tmp.y - offY, tmp.z + d);
+      camera.lookAt(tmp.x - sxw, tmp.y - offY, tmp.z);
+    } else {
+      var pushIn = .85 * K * sm(.155, .195, p) * (1 - sm(.22, .27, p));   /* lean in for the reveal */
+      var baseZ = lerp(5.4, 4.3, B) * K + E * 1.5 * K - sd * 1.0 * K - pushIn;
+      var camZ = lerp(baseZ, 1.2 * K * .9 + .1, Dd), camY = Dd * LENS_Y * .98;
+      camera.position.set(0, camY, camZ);
+      camera.lookAt(0, camY, 0);
+    }
+
+    /* mood */
+    stars.material.opacity = .9 - .4 * w;
+    stars.rotation.y = p * .6; stars.rotation.x = p * .25;
+    amb.intensity = lerp(.22, .55, w);
+    sun.intensity = lerp(2.5, 2.9, w);
+
+    updateOverlay(p, w);
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  /* wait for web fonts so the canvas textures use them, then build once */
+  (document.fonts && document.fonts.load ? Promise.all([document.fonts.load('300 120px "Sora"'), document.fonts.load('500 22px "Inter"')]).catch(function () {}) : Promise.resolve()).then(function () {
+    try { glass.material.map.dispose(); glass.material.map = glassTexture(); } catch (e) {}
+    frame();
+  });
+})();
+</script>
+
+</body></html>
